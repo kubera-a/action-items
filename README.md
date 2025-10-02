@@ -49,12 +49,18 @@ Along with that, it should automatically generate the responses to these emails.
 Furthermore, having an email reader would also help in Phase 2 where we keep track of papers and reports
 as most of us are subscribed to various newsletters that send out these papers and reports.
 
-## Phase 2: Papers of interest
+## Phase 2: Papers of interest (Verified)
 
-The second phase of this project is to keep track of papers that are being published in the field of AI.
-There are various sources, such as hugginface's newsletter etc along with twitter accounts of various researchers
+The second phase of this project is to keep track of papers that are being published in the field of AI. In part,
+because this is an impossible task to do due to the volume of papers being published.
+There are various sources, such as huggingface's newsletter etc along with bluesky accounts of various researchers
 that keep track of these papers. The goal of this phase is to be able to create a script that can read these sources
 and create a markdown list of papers that I should read if multiple individuals have mentioned the paper.
+
+X's API has undergone heavy limitation for the free tier, therefore we are looking into alternatives
+like bluesky (where Yann LeCun is active). Essentially, the whole point of this is to
+use various verified sources to cross reference and filter papers that are worth reading. Rather than relying
+on the wisdom of the crowd, ala subreddits like locallama, which are often filled with low-effort content. 
 
 ## Phase 3: Trend reports and analysis
 The third phase of this project is to keep track of trend reports and analysis in the field of AI.
