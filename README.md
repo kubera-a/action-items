@@ -27,12 +27,67 @@ cd action-items
 uv sync
 ```
 
+## 🔐 Gmail API Setup (Required)
+
+**Important:** Each user must create their own Gmail API credentials. This is a one-time setup (5-10 minutes).
+
+👉 **[Follow the complete setup guide →](SETUP.md)**
+
+**Quick summary:**
+1. Create a Google Cloud Project
+2. Enable Gmail API
+3. Create OAuth2 credentials (Desktop app)
+4. Download `client_secret_*.json` to project root
+5. Add yourself as a test user
+
+**Why each user needs their own credentials:**
+- Your credentials = your Gmail access only
+- No verification process needed
+- Complete privacy and data control
+- No rate limit sharing
+
 ## Usage
 
+### Interactive Mode (Default)
+
 ```bash
-# Run the main script
-python main.py
+# Run interactively - prompts for options
+uv run python main.py fetch
 ```
+
+You'll be prompted to choose:
+1. Fetch since last run (incremental)
+2. Fetch from last N days
+3. Fetch since specific date
+
+### Command-Line Arguments
+
+```bash
+# Incremental mode - fetch since last run (default)
+uv run python main.py fetch --no-interactive
+
+# Fetch emails from last 7 days
+uv run python main.py fetch --days 7
+
+# Fetch emails since specific date
+uv run python main.py fetch --since 2025-10-01
+
+# Fetch all emails (not just unread)
+uv run python main.py fetch --days 7 --all
+
+# Check status
+uv run python main.py status
+
+# Reset last run timestamp
+uv run python main.py reset
+```
+
+### Available Commands
+
+- `fetch` - Fetch emails from Gmail (default command)
+- `status` - Show last run information
+- `reset` - Reset last run timestamp
+- `--help` - Show help for any command
 
 ## Current Status
 
@@ -67,4 +122,25 @@ The third phase of this project is to keep track of trend reports and analysis i
 Similar to Phase 2, the goal of this phase is to be able to create a script that can read various sources
 and create a markdown list of trend reports and analysis that I should read if multiple individuals have mentioned the report.
 
+## 🔒 Security & Privacy
+
+**Credentials are NOT shared:**
+- Each user creates and owns their OAuth credentials
+- The repository does NOT include any API keys or secrets
+- `client_secret_*.json` and `token.json` are gitignored
+- Your Gmail data never touches any third-party servers
+
+**Best practices:**
+- ✅ Keep `client_secret_*.json` private
+- ✅ Never commit credentials to git
+- ✅ Review the OAuth scopes before granting access
+- ✅ Revoke access anytime via [Google Account Settings](https://myaccount.google.com/permissions)
+
+## Contributing
+
+When contributing to this project:
+1. Do NOT commit your personal credentials
+2. Test with your own Google Cloud Project
+3. Follow the coding guidelines in [CLAUDE.md](CLAUDE.md)
+4. Keep dependencies minimal (see Phase 1 requirements)
 

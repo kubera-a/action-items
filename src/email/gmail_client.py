@@ -1,6 +1,7 @@
 """Gmail API client for fetching and managing emails."""
 
 import base64
+import html
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
 from typing import Optional
@@ -145,7 +146,7 @@ def get_email_body(payload: dict) -> str:
 def fetch_emails(
     after: Optional[datetime] = None,
     before: Optional[datetime] = None,
-    days: Optional[int] = 7,
+    days: Optional[int] = None,
     unread_only: bool = True,
     labels: Optional[list[str]] = None,
     max_results: int = 100,
@@ -155,7 +156,7 @@ def fetch_emails(
     Args:
         after: Fetch emails after this date
         before: Fetch emails before this date
-        days: Fetch emails from last N days (default: 7)
+        days: Fetch emails from last N days
         unread_only: Only fetch unread emails (default: True)
         labels: Filter by Gmail labels
         max_results: Maximum number of emails to fetch (default: 100)
@@ -188,6 +189,7 @@ def fetch_emails(
 
     # Fetch full message details
     emails = []
+    filtered_count = 0
     for msg in messages:
         msg_data = service.users().messages().get(userId="me", id=msg["id"], format="full").execute()
 
@@ -204,23 +206,37 @@ def fetch_emails(
         # Parse date
         date = parsedate_to_datetime(date_header) if date_header else datetime.now()
 
-        # Get body
-        body = get_email_body(msg_data["payload"])
+        # Client-side filtering: Gmail's "after:" filter is date-only, not datetime
+        # So we need to filter by exact timestamp on the client side
+        if after:
+            # Normalize both datetimes to naive (remove timezone info) for comparison
+            # Gmail dates are timezone-aware, but our stored timestamp is naive
+            date_naive = date.replace(tzinfo=None) if date.tzinfo else date
+            if date_naive <= after:
+                filtered_count += 1
+                continue  # Skip emails at or before the cutoff time
+
+        # Get body and snippet, decode HTML entities
+        body = html.unescape(get_email_body(msg_data["payload"]))
+        snippet = html.unescape(msg_data.get("snippet", ""))
 
         # Create Email object
         email = Email(
             id=msg_data["id"],
             thread_id=msg_data["threadId"],
-            subject=subject or "(No subject)",
+            subject=html.unescape(subject) if subject else "(No subject)",
             sender=sender_name,
             sender_email=sender_email,
             recipient=to_header,
             date=date,
-            snippet=msg_data.get("snippet", ""),
+            snippet=snippet,
             body=body,
             labels=msg_data.get("labelIds", []),
             is_unread="UNREAD" in msg_data.get("labelIds", []),
         )
         emails.append(email)
+
+    if filtered_count > 0:
+        print(f"Filtered out {filtered_count} already-seen email(s) based on timestamp")
 
     return emails
